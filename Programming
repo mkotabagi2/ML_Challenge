@@ -1,10 +1,25 @@
-%%ONTIME2 was in csv mode. i saved it in xls format  and considered only
-%%first hundred rows and also entered 0 value in empty cells.
+%%Flight arrival Data Taken from https://transtats.bts.gov 
+%%in the problem we are designing a binary classifier.
+%%The steps in the binary classifier includes dividing the data into training data and testing data 
+%%using the trining data we collect and assemble Nxd matrix of features vectors into matrix. 
+%%Assemble targets into T, a column vector of size Nx1 containing class-labels -1 or 1.
+%%Construct the augmented feature vector set xa by perpending a column of 1s in front  of the 
+%%matrix X.Find the linear classifier W=pseudoinverse(xa)*T. Here pseudoinverse is the standard in
+%%linear algebra software. the classifier W is a column vector .
+
+
+%ONTIME2 was in csv mode. i saved it in xls format  and considered only
+%%Load the data in excel format
+%%num contains the numerical data from the data. txt contains the text data from the data.
 [num,txt,raw]=xlsread("ONTIME2.xls",1);
 
+%%delete the header from the txt data
 txt(1,:)=[];
+
 %%unique numeric value for each flight carrier. as the unique carrier is
 %%found by considering 3 columns and they also contain string
+%%the columns Unique_Carrier, Airline_id, Carrier together make the Airline carrier unique
+%%to maintain a uniqe number, Incremented a value 'count' such that a unique combination gets a unique number.
 i=1;
 count=1;
 num(1,20)=count;
@@ -23,14 +38,17 @@ end
 end
 
 %%forming X and T matrix
+%%X matrix is the matrix that contains the required data, on which we design a linear classifier or binary classifier
+%%T matrix is the ouput class label in this example it is the delay in the binary form.
 X=[num(:,20),num(:,1),num(:,7),num(:,8),num(:,9),num(:,10),num(:,11),num(:,12),num(:,13),num(:,14),num(:,15),num(:,16),num(:,18),num(:,19),num(:,17)];
 %T=num(:,17);
 
 %%dividing the given data into training and testing data
 %%randomly select the training set and testing set 
-%N=75;%required number of rows
-%c=randperm(length(X),N);%randomly selects 75 rows from the X
-%train=X(c,:);% this will put the elected rows in c in to the table B
+%%data_rand=randomly distributing the rows from the X matrix
+%%tr=amount of data that should be divided as training data
+%%te=amount of data that should be divided as testing data
+%%trainingData and testingData is the data after dividing the X matrix into 75% training data nad 25% testing data
 data_rand = X(randperm(size(X,1)),:);
 tr=ceil(.75*length(data_rand));
 te=length(data_rand)-tr;
@@ -38,6 +56,10 @@ trainingData= data_rand(1:tr,:);
 testingData= data_rand(1:te,:);
 
 %%forming X and T matrix
+%%Ttr=T matrix of the training data
+%%Tte=T matrix of the testing data
+%%X=X matrix correcponding to the training data
+%%T=T matrix corresponding to the training data
 Ttr=trainingData(:,15);
 Tte=testingData(:,15);
 trainingData(:,15)=[];
@@ -66,6 +88,9 @@ one=ones(length(X),1);
 xa=[one,X];
 
 %%verify T
+%%temp is the T matrix that we get after all the binary classifier steps.
+%%that is it is the prediction in delay of flight that we made vs T matrix which is the 
+%%delay of flight from the data.
 temp=sign(xa*w);
 
 %%check how many of originalT and calculated T match
